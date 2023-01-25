@@ -4,7 +4,6 @@ const fetchUser = require("../middleware/fetchUser");
 const User = require("../models/User");
 const axios = require("axios");
 const Plan = require("../models/PricingPlan");
-const geoIP = require("geoip-lite");
 
 router.post("/add", fetchUser, async (req, res) => {
   const user = await User.findById(req.user.id).select("email");
@@ -22,9 +21,6 @@ router.post("/add", fetchUser, async (req, res) => {
       .json({ Error: "Please provide a valid plan name, price, and benefits" });
 
   try {
-    const geo = geoIP.lookup(req.ip);
-    console.log(geo);
-
     let plan = await Plan.findOne({ name: req.body.name });
     if (plan) return res.status(409).json({ Error: "Plan already exists" });
 
