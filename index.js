@@ -11,9 +11,9 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 
-app.get("/", (req, res) =>
-  res.status(200).send("Welcome to the API of journalmytrade.com")
-);
+app.get("/", (req, res) => {
+  return res.status(200).send("Welcome to the API of journalmytrade.com");
+});
 
 let options = {
   dotfiles: "ignore",
@@ -31,6 +31,8 @@ app.use(bodyParser.json());
 app.use(express.static("profiles", options));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/faq", require("./routes/faq"));
+app.use("/api/pricing", require("./routes/pricing"));
+app.use("/api/razorpay", require("./routes/razorpay"));
 app.use("/api/contact", require("./routes/contact"));
 app.use("/api/articles", require("./routes/articles"));
 
