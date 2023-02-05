@@ -26,7 +26,7 @@ router.post("/add", async (req, res) => {
     return res.status(200).json({ Success: true });
   } catch (err) {
     console.error(err);
-    return res.status(500).json("Internal Server Error");
+    return res.status(500).json({ Error: "Internal Server Error" });
   }
 });
 
@@ -86,7 +86,7 @@ router.delete("/delete", fetchUser, async (req, res) => {
     return res.status(200).json({ Success: true });
   } catch (err) {
     console.error(err);
-    return res.status(500).json("Internal Server Error");
+    return res.status(500).json({ Error: "Internal Server Error" });
   }
 });
 

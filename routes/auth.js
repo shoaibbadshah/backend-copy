@@ -6,6 +6,9 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const fetchUser = require("../middleware/fetchUser");
 const User = require("../models/User");
+const Transaction = require("../models/Transaction");
+const Account = require("../models/TradingAccount");
+const axios = require("axios");
 
 const serverLoc = "http://localhost:5000";
 const verificationRedirectURL = "https://google.com";
@@ -242,6 +245,85 @@ router.get("/getuser", fetchUser, async (req, res) => {
   }
 });
 
+router.post("/updateAccountType", fetchUser, async (req, res) => {
+  if (!req.body.subID)
+    return res
+      .status(406)
+      .json({ Error: "Please provide a valid subscription ID" });
+  try {
+    let user = await User.findById(req.user.id);
+
+    if (req.body.subID.startsWith("I-")) {
+      const pplResult = await axios
+        .get(
+          `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${req.body.subID}`,
+          { headers: { Authorization: process.env.PAYPAL_AUTH_TOKEN } }
+        )
+        .then((response) => response)
+        .catch((err) => err);
+
+      if (pplResult.response?.status === 404)
+        return res.status(404).json({ Error: "PayPal Subscription not found" });
+      else if (pplResult.data.status === "ACTIVE") {
+        user = await User.findByIdAndUpdate(
+          user.id,
+          {
+            $set: { accountType: "Paid" },
+          },
+          { new: false }
+        );
+        return res.status(200).json({ Success: true });
+      } else {
+        user = await User.findByIdAndUpdate(
+          user.id,
+          {
+            $set: { accountType: "Free" },
+          },
+          { new: false }
+        );
+        return res.status(200).json({ Success: true });
+      }
+    } else if (req.body.subID.startsWith("sub_")) {
+      const rzpResult = await axios
+        .get(`https://api.razorpay.com/v1/subscriptions/${req.body.subID}`, {
+          headers: { Authorization: process.env.RAZORPAY_AUTH_TOKEN },
+        })
+        .then((response) => response.data)
+        .catch((err) => console.error(err));
+
+      if (rzpResult.error)
+        return res
+          .status(404)
+          .json({ Error: "Razorpay Subscription not found" });
+      else if (rzpResult.status === "active") {
+        user = await User.findByIdAndUpdate(
+          user.id,
+          {
+            $set: { accountType: "Paid" },
+          },
+          { new: false }
+        );
+        return res.status(200).json({ Success: true });
+      } else {
+        user = await User.findByIdAndUpdate(
+          user.id,
+          {
+            $set: { accountType: "Free" },
+          },
+          { new: false }
+        );
+        return res.status(200).json({ Success: true });
+      }
+    }
+    return res
+      .status(400)
+      .json({ Error: "Please provide a valid subscription ID" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ Error: "Internal Server Error" });
+  }
+});
+
 router.post("/createaccount", async (req, res) => {
   if (!req.body.username || !req.body.email || !req.body.password) {
     return res
@@ -372,6 +454,14 @@ router.delete("/deleteuser", fetchUser, async (req, res) => {
     if (passCompare === false) {
       return res.status(401).json({ Error: "Incorrect Password" });
     }
+
+    await Transaction.deleteMany({
+      user: req.user.id,
+    });
+
+    await Account.deleteMany({
+      user: req.user.id,
+    });
 
     user = await User.findByIdAndDelete(user.id);
     return res.status(200).json({ Success: true });

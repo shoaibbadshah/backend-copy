@@ -18,6 +18,18 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  accountType: {
+    type: String,
+    default: "Free",
+  },
+  pplSubID: {
+    type: String,
+    default: "",
+  },
+  rzpSubID: {
+    type: String,
+    default: "",
+  },
   DateAdded: {
     type: String,
     default: new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),

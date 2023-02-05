@@ -8,8 +8,8 @@ const User = require("../models/User");
 let response;
 
 const razorpay = new Razorpay({
-  key_id: "rzp_test_bnJLfrdyvcIWmp",
-  key_secret: "SvESp1LMnApP8nyjBj2UhNdG",
+  key_id: process.env.RZP_KEY_ID,
+  key_secret: process.env.RZP_KEY_SECRET,
 });
 
 router.post("/", fetchUser, async (req, res) => {
@@ -29,47 +29,22 @@ router.post("/", fetchUser, async (req, res) => {
       return;
     }
 
-    const amount = plan.price;
-    const payment_capture = 1;
-    const currency = "INR";
-    // const options = {
-    //   amount: amount * 100,
-    //   receipt: user.email,
-    //   handler: (response) => console.log(response),
-    //   currency,
-    //   payment_capture,
-    // };
-    // response = await razorpay.orders.create(options);
+    let expiryDate = new Date();
+    expiryDate.setFullYear(expiryDate.getFullYear + 1);
 
     const options = {
-      period: "weekly",
-      interval: 1,
-      item: {
-        name: "Test plan - Weekly",
-        amount: 69900,
-        currency: "INR",
-        description: "Description for the test plan",
-      },
-      notes: {
-        notes_key_1: "Tea, Earl Grey, Hot",
-        notes_key_2: "Tea, Earl Grey… decaf.",
-      },
-      // period: "yearly",
-      // interval: 12,
-      // item: {
-      //   name: plan.name,
-      //   amount: amount * 100,
-      //   currency,
-      // },
-      // handler: (response) => console.log(response),
+      plan_id: plan.rzpId,
+      quantity: 1,
+      total_count: 1,
+      customer_notify: 1,
     };
     try {
-      response = await razorpay.plans.create(options);
+      response = await razorpay.subscriptions.create(options);
     } catch (err) {
       console.error(err);
     }
 
-    return res.status(200).json({
+    return res.status(201).json({
       response,
     });
   } catch (err) {

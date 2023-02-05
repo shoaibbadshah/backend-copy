@@ -32,9 +32,13 @@ app.use(express.static("profiles", options));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/faq", require("./routes/faq"));
 app.use("/api/pricing", require("./routes/pricing"));
+app.use("/api/paypal", require("./routes/paypal"));
 app.use("/api/razorpay", require("./routes/razorpay"));
 app.use("/api/contact", require("./routes/contact"));
 app.use("/api/articles", require("./routes/articles"));
+app.use("/api/account", require("./routes/account"));
+app.use("/api/transaction", require("./routes/transaction"));
+app.use("/api/trade", require("./routes/trade"));
 
 app.get("/articleimage/:imageId", async (req, res) => {
   try {

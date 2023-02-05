@@ -1,28 +1,24 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const PlanSchema = new Schema({
-  name: {
-    type: String,
+const TransactionSchema = new Schema({
+  type: {
+    type: String, // Withdrawal, Deposit, Dividends, Taxes, Fees
     required: true,
   },
-  price: {
+  value: {
     type: Number,
     required: true,
   },
-  INRPrice: {
-    type: Number,
-    required: true,
-  },
-  benefits: {
+  date: {
     type: String,
     required: true,
   },
-  rzpId: {
+  account: {
     type: String,
     required: true,
   },
-  pplId: {
+  user: {
     type: String,
     required: true,
   },
@@ -33,5 +29,5 @@ const PlanSchema = new Schema({
   },
 });
 
-const Plan = mongoose.model("plans", PlanSchema);
-module.exports = Plan;
+const Transaction = mongoose.model("Transactions", TransactionSchema);
+module.exports = Transaction;
